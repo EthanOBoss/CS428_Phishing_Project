@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Phishing Report Dashboard</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Phishing Report Dashboard</h1>
+        
+        <div class="filters">
+            <button id="allReports" class="active">All Reports</button>
+            <button id="unreviewedReports">Unreviewed</button>
+            <select id="clientFilter">
+                <option value="">Filter by Client</option>
+            </select>
+        </div>
+
+        <div id="reportList" class="report-list">
+            <!-- Reports will be loaded here -->
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
