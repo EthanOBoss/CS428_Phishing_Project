@@ -1,7 +1,3 @@
-# CS428_Phishing_Project
-
-to run the project (mac):
-
 # Install MySQL
 brew install mysql
 
