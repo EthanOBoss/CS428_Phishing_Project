@@ -2,60 +2,100 @@ const API_URL = 'http://localhost:3000/api';
 
 // DOM Elements
 const reportList = document.getElementById('reportList');
-const allReportsBtn = document.getElementById('allReports');
-const unreviewedBtn = document.getElementById('unreviewedReports');
-const clientFilter = document.getElementById('clientFilter');
+const filterRadios = document.querySelectorAll('input[name="filter"]');
+const clientFilterForm = document.getElementById('clientFilter');
+const clientRadioContainer = document.getElementById('clientRadioContainer');
 
-// Load reports on page load
+// Load reports and clients on page load
 document.addEventListener('DOMContentLoaded', () => {
-    loadClients();
-    loadReports();
+    loadClients().then(() => applyFilters());
 });
 
-// Event Listeners
-allReportsBtn.addEventListener('click', () => {
-    setActiveButton(allReportsBtn);
-    loadReports();
+// ---- FILTER FUNCTIONS ----
+function getSelectedFilter() {
+    const f = document.querySelector('input[name="filter"]:checked');
+    return f ? f.value : 'all';
+}
+
+function getSelectedClient() {
+    const c = document.querySelector('input[name="clientFilterRadio"]:checked');
+    return c ? c.value : 'noFilter'; // your default "All Clients"
+}
+
+async function applyFilters() {
+    const filter = getSelectedFilter();      // 'all' or 'unreviewed'
+    const clientId = getSelectedClient();    // 'noFilter' or actual ClientID
+
+    if (clientId === "noFilter") {
+        if (filter === 'all') {
+            return loadReports();
+        } else {
+            return loadUnreviewedReports();
+        }
+    }
+
+    // Specific client selected
+    if (filter === 'all') {
+        return loadReportsByClient(clientId);
+    }
+
+    // filter === 'unreviewed' AND client selected
+    showLoading();
+    try {
+        const tryUrl = `${API_URL}/reports/client/${clientId}/unreviewed`;
+        let resp = await fetch(tryUrl);
+
+        if (resp.ok) {
+            const reports = await resp.json();
+            displayReports(reports);
+            return;
+        }
+
+        // Fallback: fetch client reports and filter client-side
+        resp = await fetch(`${API_URL}/reports/client/${clientId}`);
+        if (!resp.ok) throw new Error('Failed to load client reports');
+        const reports = await resp.json();
+        const unreviewed = reports.filter(r => !r.Reviewed);
+        displayReports(unreviewed);
+    } catch (error) {
+        console.error('Error applying combined filters:', error);
+        reportList.innerHTML = '<p>Error loading reports</p>';
+    }
+}
+
+// ---- EVENT LISTENERS ----
+filterRadios.forEach(radio => {
+    radio.addEventListener('change', () => applyFilters());
 });
 
-unreviewedBtn.addEventListener('click', () => {
-    setActiveButton(unreviewedBtn);
-    loadUnreviewedReports();
-});
-
-clientFilter.addEventListener('change', (e) => {
-    const clientId = e.target.value;
-    if (clientId) {
-        loadReportsByClient(clientId);
-    } else {
-        loadReports();
+clientFilterForm.addEventListener('change', (e) => {
+    if (e.target.name === "clientFilterRadio") {
+        applyFilters();
     }
 });
 
-// Functions
-function setActiveButton(activeBtn) {
-    document.querySelectorAll('.filters button').forEach(btn => {
-        btn.classList.remove('active');
-    });
-    activeBtn.classList.add('active');
-}
-
+// ---- CLIENT LOADING ----
 async function loadClients() {
     try {
         const response = await fetch(`${API_URL}/clients`);
         const clients = await response.json();
         
+        clientRadioContainer.innerHTML = ""; // clear existing
+
         clients.forEach(client => {
-            const option = document.createElement('option');
-            option.value = client.ClientID;
-            option.textContent = client.ClientName;
-            clientFilter.appendChild(option);
+            const label = document.createElement('label');
+            label.innerHTML = `
+                <input type="radio" name="clientFilterRadio" value="${client.ClientID}">
+                ${client.ClientName}
+            `;
+            clientRadioContainer.appendChild(label);
         });
     } catch (error) {
         console.error('Error loading clients:', error);
     }
 }
 
+// ---- REPORT LOADERS ----
 async function loadReports() {
     showLoading();
     try {
@@ -92,6 +132,7 @@ async function loadReportsByClient(clientId) {
     }
 }
 
+// ---- MARK REVIEWED ----
 async function markAsReviewed(reportId, button) {
     try {
         const response = await fetch(`${API_URL}/reports/${reportId}/review`, {
@@ -102,7 +143,6 @@ async function markAsReviewed(reportId, button) {
             button.disabled = true;
             button.textContent = 'Reviewed';
             
-            // Update status badge
             const card = button.closest('.report-card');
             const statusBadge = card.querySelector('.status');
             statusBadge.textContent = 'Reviewed';
@@ -115,8 +155,9 @@ async function markAsReviewed(reportId, button) {
     }
 }
 
+// ---- DISPLAY ----
 function displayReports(reports) {
-    if (reports.length === 0) {
+    if (!reports.length) {
         reportList.innerHTML = '<p class="loading">No reports found</p>';
         return;
     }
@@ -148,6 +189,7 @@ function displayReports(reports) {
     `).join('');
 }
 
+// ---- LOADING UI ----
 function showLoading() {
     reportList.innerHTML = '<p class="loading">Loading reports...</p>';
 }

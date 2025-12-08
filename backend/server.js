@@ -78,6 +78,23 @@ app.put('/api/reports/:reportId/review', async (req, res) => {
   }
 });
 
+//mark report as unreviewed
+app.put('/api/reports/:reportId/review', async (req, res) => {
+  try {
+    const { reportId } = req.params;
+
+    await db.query(
+      'UPDATE Report SET Reviewed = 0 WHERE ReportID = ?',
+      [reportId]
+    );
+
+    res.json({ message: 'Report marked as unreviewed' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Database error' });
+  }
+});
+
 // Health check
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', message: 'API is running' });

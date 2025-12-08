@@ -8,30 +8,42 @@
     <meta name="color-scheme" content="light">
 </head>
 <body>
+    <!-- Header -->
     <header>
-        <h1 class="forHeader">ORTSOC</h1>
+        <h1 class="header">ORTSOC</h1>
     </header>
-    <!-- <div class="MainContents">
+    <!-- Body -->
+    <main>
+        <!-- Sidebar -->
         <div class="sidebar">
-            <button id="allReports" class="active">All Reports</button>
-            <button id="unreviewedReports">Unreviewed</button>
-        </div> -->
+            <!-- All/Unreviewed Reports -->
+            <form>
+                <h2>View</h2>
+                <label>
+                    <input type="radio" name="filter" value="all" checked> All Reports
+                </label>
+                <label>
+                    <input type="radio" name="filter" value="unreviewed"> Unreviewed
+                </label>
+            </form>
+            <!-- Filter by client -->
+            <form  id="clientFilter">
+                <h2>Load by client</h2>
+                <label>
+                    <input type="radio" name="clientFilterRadio" value="noFilter" checked> All Clients
+                </label>
+                <div id="clientRadioContainer"></div>
+            </form>
+        </div>
+        <!-- Mian Content -->
         <div class="container">
-            <h1>Phishing Report Dashboard</h1>
-            
-            <div class="filters">
-                <button id="allReports" class="active">All Reports</button>
-                <button id="unreviewedReports">Unreviewed</button>
-                <select id="clientFilter">
-                    <option value="">Filter by Client</option>
-                </select>
-            </div>
+            <h1 class="dashHeader">Phishing Report Dashboard</h1>
 
             <div id="reportList" class="report-list">
                 <!-- Reports will be loaded here -->
             </div>
         </div>
-    <!-- </div> -->
+    </main>
 
     <script src="app.js"></script>
 </body>
