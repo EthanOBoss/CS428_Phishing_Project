@@ -10,8 +10,8 @@
     <h1>Report a Suspicious Email</h1>
     <p>Please upload the email you believe may be a phishing attempt.</p>
 
-    <form>
-    
+    <form action="http://localhost:3000/api/submit" method="POST" enctype="multipart/form-data">
+
         <label for="name">Company Name:</label>
         <input type="text" id="company" name="company">
 
@@ -27,7 +27,7 @@
         <label for="file">Upload Email (.eml file):</label>
         <input type="file" id="file" name="file" accept=".eml">
 
-        <button type="submit" disabled>Submit</button>
+        <button type="submit">Submit</button>
     </form>
   </div>
 
